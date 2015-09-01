@@ -6,13 +6,25 @@ import java.util.Stack;
 
 import com.dtolabs.rundeck.core.common.INodeEntry;
 import com.dtolabs.rundeck.core.common.NodeEntryImpl;
+import com.dtolabs.rundeck.plugins.orchestrator.Orchestrator;
+import org.apache.log4j.*;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
 public class TagOrchestratorTest {
 
-    public static final String ATTRIBUTE = "datacenter";
+    public String ATTRIBUTE = "datacenter, somethingThatDoesntExist";
+    //public String ATTRIBUTE = "datacenter";
+
+    public  TagOrchestratorTest() {
+        ConsoleAppender console = new ConsoleAppender();
+        console.setName("console");
+        console.setLayout(new PatternLayout("%d [%p|%c|%C{1}] %m%n"));
+        console.setThreshold(Level.ALL);
+        console.activateOptions();
+        Logger.getRootLogger().addAppender(console);
+    }
 
     @Test
     public void testRespectMaximumPerGroup() {
@@ -24,7 +36,8 @@ public class TagOrchestratorTest {
             }
         }
 
-        TagOrchestrator plugin = new TagOrchestrator(null, nodes, ATTRIBUTE, 2);
+        TagOrchestratorPlugin factory = new TagOrchestratorPlugin(ATTRIBUTE, 2);
+        Orchestrator plugin = factory.createOrchestrator(null, nodes);
 
         Stack<INodeEntry> inProgressNodes = new Stack<INodeEntry>();
 
@@ -65,7 +78,7 @@ public class TagOrchestratorTest {
 
     private NodeEntryImpl createNode(String nodeName, String datacenter) {
         NodeEntryImpl nodeEntry = new NodeEntryImpl(nodeName, nodeName);
-        nodeEntry.setAttribute(ATTRIBUTE, datacenter);
+        nodeEntry.setAttribute("datacenter", datacenter);
         return nodeEntry;
     }
 }

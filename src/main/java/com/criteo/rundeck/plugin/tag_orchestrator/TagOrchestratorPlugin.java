@@ -15,14 +15,22 @@ import java.util.Collection;
 @Plugin(name = TagOrchestrator.SERVICE_PROVIDER_TYPE, service = "Orchestrator")
 public class TagOrchestratorPlugin implements OrchestratorPlugin {
 
-    @PluginProperty(title="Tag Name", description = "Tag used to group nodes", required = true)
-    String tagName;
+    @PluginProperty(title="Tag Name", description = "Tag(s) used to group nodes. Multiple tags can be separated by commas or spaces", required = true)
+    String tagsName;
 
-    @PluginProperty(title="MaxPerGroup", description = "Maximum number of simultenous updated node per group")
+    @PluginProperty(title="MaxPerGroup", description = "Maximum number of simultaneous updated node per group")
     int maxPerGroup;
+
+    public  TagOrchestratorPlugin() {}
+
+    public  TagOrchestratorPlugin(String tagNames, int maxPerGroup) {
+        this.tagsName = tagNames;
+        this.maxPerGroup = maxPerGroup;
+    }
 
     @Override
     public Orchestrator createOrchestrator(StepExecutionContext context, Collection<INodeEntry> nodes) {
-        return new TagOrchestrator(context, nodes, tagName, maxPerGroup);
+        String[] tags = tagsName.split("( |,)+");
+        return new TagOrchestrator(context, nodes, tags, maxPerGroup);
     }
 }

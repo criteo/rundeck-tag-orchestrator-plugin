@@ -15,20 +15,20 @@ public class TagOrchestrator implements Orchestrator {
     private static final Logger logger = Logger.getLogger(TagOrchestrator.class);
 
     public static final String SERVICE_PROVIDER_TYPE = "tag-orchestrator";
-    private final String tagName;
+    private final String[] tagNames;
     private final int maxPerGroup;
 
     private final Map<String, Collection<INodeEntry>> toDoNodesByGroup = new HashMap<String, Collection<INodeEntry>>();
     private final Map<String, Map<String, INodeEntry>> inProgressNodesByGroup = new HashMap<String, Map<String, INodeEntry>>();
 
-    public TagOrchestrator(StepExecutionContext context, Collection<INodeEntry> nodes, String tagName, int maxPerGroup) {
+    public TagOrchestrator(StepExecutionContext context, Collection<INodeEntry> nodes, String[] tagNames, int maxPerGroup) {
 
-        this.tagName = tagName;
+        this.tagNames = tagNames;
         this.maxPerGroup = maxPerGroup;
 
         // groups nodes by group names
         for(INodeEntry node : nodes) {
-            String groupName = getNodeGroupName(node, tagName);
+            String groupName = getNodeGroupName(node, tagNames);
             if (!toDoNodesByGroup.containsKey(groupName)) {
                 toDoNodesByGroup.put(groupName, new Stack<INodeEntry>());
             }
@@ -43,13 +43,17 @@ public class TagOrchestrator implements Orchestrator {
         }
     }
 
-    private static String getNodeGroupName(INodeEntry node, String tagName) {
+    private static String getNodeGroupName(INodeEntry node, String[] tagNames) {
         Map<String, String> attributes = node.getAttributes();
-        String groupName;
-        if (attributes.containsKey(tagName)) {
-            groupName = attributes.get(tagName);
-        } else {
-            groupName = "noGroupName";
+        String groupName = "";
+        for(String tagName : tagNames) {
+            String group;
+            if (attributes.containsKey(tagName)) {
+                group = attributes.get(tagName);
+            } else {
+                group = "noValue";
+            }
+            groupName += String.format("|%s=%s", tagName, group);
         }
         return groupName;
     }
@@ -87,7 +91,7 @@ public class TagOrchestrator implements Orchestrator {
 
     @Override
     public void returnNode(INodeEntry node, boolean b, NodeStepResult nodeStepResult) {
-        String groupName = getNodeGroupName(node, tagName);
+        String groupName = getNodeGroupName(node, tagNames);
         INodeEntry removedNode = inProgressNodesByGroup.get(groupName).remove(node.extractHostname());
         if (removedNode == null) {
             logger.error(String.format("%s was not in progress but has just been returned. It should be impossible", node.extractHostname()));
