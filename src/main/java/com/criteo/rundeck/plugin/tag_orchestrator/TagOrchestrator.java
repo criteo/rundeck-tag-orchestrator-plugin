@@ -72,7 +72,7 @@ public class TagOrchestrator implements Orchestrator {
         return true;
     }
 
-    private boolean groupIsAtMaximumCapacity(String groupName, Map<String, INodeEntry> inProgressNodes) {
+    private boolean canProcessANodeForGroup(String groupName, Map<String, INodeEntry> inProgressNodes) {
         if (maxPerGroup < 1) { // it is a percentage of nodes
             return inProgressNodes.size() * 100 / groupSize.get(groupName) < maxPerGroup * 100;
         } else { // it is a hard number of nodes
@@ -86,7 +86,7 @@ public class TagOrchestrator implements Orchestrator {
             Stack<INodeEntry> toDoNodes = (Stack<INodeEntry>)toDoNodesByGroup.get(groupName);
             Map<String, INodeEntry> inProgressNodes = inProgressNodesByGroup.get(groupName);
 
-            boolean canStartANode = toDoNodes.size() > 0 && groupIsAtMaximumCapacity(groupName, inProgressNodes);
+            boolean canStartANode = toDoNodes.size() > 0 && canProcessANodeForGroup(groupName, inProgressNodes);
 
             if (canStartANode) {
                 INodeEntry toDoNode = toDoNodes.pop();
