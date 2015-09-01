@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <artifactId>rundeck-plugins-parent</artifactId>
+    <groupId>org.rundeck-plugins</groupId>
+    <version>2</version>
+  </parent>
+  <artifactId>rundeck-tag-orchestrator-plugin</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+  <name>Rundeck Tag Orchestrator Plugin</name>
+  <url>http://rundeck.org</url>
+  <inceptionYear>2015</inceptionYear>
+  <licenses>
+    <license>
+      <name>The Apache Software License, Version 2.0</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <properties>
+    <plugin.release.version>1.0.0</plugin.release.version>
+  </properties>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <version>2.6</version>
+        <configuration>
+          <archive>
+            <index>true</index>
+            <manifest>
+              <addClasspath>true</addClasspath>
+            </manifest>
+             <manifestEntries>
+              <Rundeck-Plugin-Version>1.1</Rundeck-Plugin-Version>
+               <Rundeck-Plugin-Archive>true</Rundeck-Plugin-Archive>
+              <Rundeck-Plugin-File-Version>1.0-SNAPSHOT</Rundeck-Plugin-File-Version>
+              <Rundeck-Plugin-Classnames>com.criteo.rundeck.plugin.tag_orchestrator.TagOrchestratorPlugin</Rundeck-Plugin-Classnames>
+            </manifestEntries>
+          </archive>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  <dependencies>
+    <dependency>
+      <groupId>org.rundeck</groupId>
+      <artifactId>rundeck-core</artifactId>
+      <version>2.5.0</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.11</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-nop</artifactId>
+      <version>1.6.3</version>
+      <scope>compile</scope>
+    </dependency>
+  </dependencies>
+</project>
