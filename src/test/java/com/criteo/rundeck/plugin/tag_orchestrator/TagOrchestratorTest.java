@@ -15,7 +15,6 @@ import static org.junit.Assert.*;
 public class TagOrchestratorTest {
 
     public String ATTRIBUTE = "datacenter, somethingThatDoesntExist";
-    //public String ATTRIBUTE = "datacenter";
 
     public  TagOrchestratorTest() {
         ConsoleAppender console = new ConsoleAppender();
@@ -24,6 +23,24 @@ public class TagOrchestratorTest {
         console.setThreshold(Level.ALL);
         console.activateOptions();
         Logger.getRootLogger().addAppender(console);
+    }
+
+    @Test
+    public  void TestRespectMaximumPercentagePerGroup() {
+        List<INodeEntry> nodes = new ArrayList<INodeEntry>();
+
+        for (String dc : new String[]{"par", "ny8", "sv6"}) {
+            for (int i = 0; i < 100; ++i) {
+                nodes.add(createNode(dc + String.valueOf(i), dc));
+            }
+        }
+        TagOrchestratorPlugin factory = new TagOrchestratorPlugin(ATTRIBUTE, 0.10);
+        Orchestrator plugin = factory.createOrchestrator(null, nodes);
+
+        for(int i=0; i<30; ++i) {
+            assertNotNull(plugin.nextNode());
+        }
+        assertNull(plugin.nextNode());
     }
 
     @Test

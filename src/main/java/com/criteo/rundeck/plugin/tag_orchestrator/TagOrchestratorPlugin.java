@@ -18,19 +18,20 @@ public class TagOrchestratorPlugin implements OrchestratorPlugin {
     @PluginProperty(title="Tag Name", description = "Tag(s) used to group nodes. Multiple tags can be separated by commas or spaces", required = true)
     String tagsName;
 
-    @PluginProperty(title="MaxPerGroup", description = "Maximum number of simultaneous updated node per group")
-    int maxPerGroup;
+    // FIXME: properties annotation supports only integer/string/boolean
+    @PluginProperty(title="MaxPerGroup", description = "If value is integer >=1, this is the maximum number of simultaneous updated node per group. If value is a float between 0 and 1, this is a ratio of the number of host per group.")
+    String maxPerGroup;
 
     public  TagOrchestratorPlugin() {}
 
-    public  TagOrchestratorPlugin(String tagNames, int maxPerGroup) {
+    public  TagOrchestratorPlugin(String tagNames, double maxPerGroup) {
         this.tagsName = tagNames;
-        this.maxPerGroup = maxPerGroup;
+        this.maxPerGroup = Double.toString(maxPerGroup);
     }
 
     @Override
     public Orchestrator createOrchestrator(StepExecutionContext context, Collection<INodeEntry> nodes) {
         String[] tags = tagsName.split("( |,)+");
-        return new TagOrchestrator(context, nodes, tags, maxPerGroup);
+        return new TagOrchestrator(context, nodes, tags, Double.valueOf(maxPerGroup));
     }
 }

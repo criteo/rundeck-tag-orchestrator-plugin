@@ -16,12 +16,13 @@ public class TagOrchestrator implements Orchestrator {
 
     public static final String SERVICE_PROVIDER_TYPE = "tag-orchestrator";
     private final String[] tagNames;
-    private final int maxPerGroup;
+    private final double maxPerGroup;
 
     private final Map<String, Collection<INodeEntry>> toDoNodesByGroup = new HashMap<String, Collection<INodeEntry>>();
     private final Map<String, Map<String, INodeEntry>> inProgressNodesByGroup = new HashMap<String, Map<String, INodeEntry>>();
+    private final Map<String, Integer> groupSize = new HashMap<String, Integer>();
 
-    public TagOrchestrator(StepExecutionContext context, Collection<INodeEntry> nodes, String[] tagNames, int maxPerGroup) {
+    public TagOrchestrator(StepExecutionContext context, Collection<INodeEntry> nodes, String[] tagNames, double maxPerGroup) {
 
         this.tagNames = tagNames;
         this.maxPerGroup = maxPerGroup;
@@ -38,7 +39,8 @@ public class TagOrchestrator implements Orchestrator {
 
         // create in progress nodes stacks
         for(String groupName : toDoNodesByGroup.keySet()) {
-            logger.info(String.format("%s group contains %d nodes", groupName, toDoNodesByGroup.get(groupName).size()));
+            groupSize.put(groupName, toDoNodesByGroup.get(groupName).size());
+            logger.info(String.format("%s group contains %d nodes", groupName, groupSize.get(groupName)));
             inProgressNodesByGroup.put(groupName, new HashMap<String, INodeEntry>());
         }
     }
@@ -68,7 +70,14 @@ public class TagOrchestrator implements Orchestrator {
             }
         }
         return true;
+    }
 
+    private boolean groupIsAtMaximumCapacity(String groupName, Map<String, INodeEntry> inProgressNodes) {
+        if (maxPerGroup < 1) { // it is a percentage of nodes
+            return inProgressNodes.size() * 100 / groupSize.get(groupName) < maxPerGroup * 100;
+        } else { // it is a hard number of nodes
+            return inProgressNodes.size() < maxPerGroup;
+        }
     }
 
     @Override
@@ -77,7 +86,7 @@ public class TagOrchestrator implements Orchestrator {
             Stack<INodeEntry> toDoNodes = (Stack<INodeEntry>)toDoNodesByGroup.get(groupName);
             Map<String, INodeEntry> inProgressNodes = inProgressNodesByGroup.get(groupName);
 
-            boolean canStartANode = toDoNodes.size() > 0 && inProgressNodes.size() < maxPerGroup;
+            boolean canStartANode = toDoNodes.size() > 0 && groupIsAtMaximumCapacity(groupName, inProgressNodes);
 
             if (canStartANode) {
                 INodeEntry toDoNode = toDoNodes.pop();
