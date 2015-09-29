@@ -12,7 +12,6 @@ import org.apache.log4j.Logger;
  * Orchestrate jobs across node groups. Group for a given node is defined using a configured tag.
  */
 public class TagOrchestrator implements Orchestrator {
-    private static final Logger logger = Logger.getLogger(TagOrchestrator.class);
 
     public static final String SERVICE_PROVIDER_TYPE = "tag-orchestrator";
     private final String[] tagNames;
@@ -40,7 +39,7 @@ public class TagOrchestrator implements Orchestrator {
         // create in progress nodes stacks
         for(String groupName : toDoNodesByGroup.keySet()) {
             groupSize.put(groupName, toDoNodesByGroup.get(groupName).size());
-            logger.info(String.format("%s group contains %d nodes", groupName, groupSize.get(groupName)));
+            System.out.println(String.format("%s group contains %d nodes", groupName, groupSize.get(groupName)));
             inProgressNodesByGroup.put(groupName, new HashMap<String, INodeEntry>());
         }
     }
@@ -94,7 +93,7 @@ public class TagOrchestrator implements Orchestrator {
                 return toDoNode;
             }
         }
-        logger.info("No node is available or all groups are already at full capacity");
+        System.out.println("No node is available or all groups are already at full capacity");
         return null;
     }
 
@@ -103,7 +102,7 @@ public class TagOrchestrator implements Orchestrator {
         String groupName = getNodeGroupName(node, tagNames);
         INodeEntry removedNode = inProgressNodesByGroup.get(groupName).remove(node.extractHostname());
         if (removedNode == null) {
-            logger.error(String.format("%s was not in progress but has just been returned. It should be impossible", node.extractHostname()));
+            System.err.println(String.format("%s was not in progress but has just been returned. It should be impossible", node.extractHostname()));
         }
     }
 }
