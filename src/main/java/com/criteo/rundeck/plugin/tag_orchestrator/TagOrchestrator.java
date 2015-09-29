@@ -62,12 +62,15 @@ public class TagOrchestrator implements Orchestrator {
     @Override
     public boolean isComplete() {
         // note: doc says we don't have to wait for all nodes to be returned
+        System.out.print("Asked if job is complete...");
         for(String groupName : toDoNodesByGroup.keySet()) {
             Collection<INodeEntry> toDoNodes = toDoNodesByGroup.get(groupName);
             if (!toDoNodes.isEmpty()) {
+                System.out.println("false");
                 return false;
             }
         }
+        System.out.println("true");
         return true;
     }
 
@@ -86,6 +89,7 @@ public class TagOrchestrator implements Orchestrator {
             Map<String, INodeEntry> inProgressNodes = inProgressNodesByGroup.get(groupName);
 
             boolean canStartANode = toDoNodes.size() > 0 && canProcessANodeForGroup(groupName, inProgressNodes);
+            System.out.println("canProcessANode for group " + groupName + "..." + canStartANode);
 
             if (canStartANode) {
                 INodeEntry toDoNode = toDoNodes.pop();
@@ -100,6 +104,7 @@ public class TagOrchestrator implements Orchestrator {
     @Override
     public void returnNode(INodeEntry node, boolean b, NodeStepResult nodeStepResult) {
         String groupName = getNodeGroupName(node, tagNames);
+        System.out.println("Returning " + node.extractHostname() + " in "+ groupName);
         INodeEntry removedNode = inProgressNodesByGroup.get(groupName).remove(node.extractHostname());
         if (removedNode == null) {
             System.err.println(String.format("%s was not in progress but has just been returned. It should be impossible", node.extractHostname()));
