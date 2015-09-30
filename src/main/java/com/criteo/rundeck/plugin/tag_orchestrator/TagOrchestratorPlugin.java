@@ -9,9 +9,6 @@ import com.dtolabs.rundeck.plugins.orchestrator.OrchestratorPlugin;
 
 import java.util.Collection;
 
-/**
- * Created by g_seux on 8/31/15.
- */
 @Plugin(name = TagOrchestrator.SERVICE_PROVIDER_TYPE, service = "Orchestrator")
 public class TagOrchestratorPlugin implements OrchestratorPlugin {
 

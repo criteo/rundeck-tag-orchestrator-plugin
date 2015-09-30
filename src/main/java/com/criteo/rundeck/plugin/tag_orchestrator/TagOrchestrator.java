@@ -17,30 +17,25 @@ public class TagOrchestrator implements Orchestrator {
     private final String[] tagNames;
     private final double maxPerGroup;
 
-    private final Map<String, Collection<INodeEntry>> toDoNodesByGroup = new HashMap<String, Collection<INodeEntry>>();
-    private final Map<String, Map<String, INodeEntry>> inProgressNodesByGroup = new HashMap<String, Map<String, INodeEntry>>();
-    private final Map<String, Integer> groupSize = new HashMap<String, Integer>();
+    private final Map<String, Group> groups = new HashMap<String, Group>();
 
     public TagOrchestrator(StepExecutionContext context, Collection<INodeEntry> nodes, String[] tagNames, double maxPerGroup) {
 
         this.tagNames = tagNames;
         this.maxPerGroup = maxPerGroup;
 
-        // groups nodes by group names
+        Map<String, GroupBuilder> groupBuilders = new HashMap<String, GroupBuilder>();
+
+        // create node groups
         for(INodeEntry node : nodes) {
             String groupName = getNodeGroupName(node, tagNames);
-            if (!toDoNodesByGroup.containsKey(groupName)) {
-                toDoNodesByGroup.put(groupName, new Stack<INodeEntry>());
+            if (!groupBuilders.containsKey(groupName)) {
+                groupBuilders.put(groupName, new GroupBuilder(groupName).setMaxPerGroup(maxPerGroup));
             }
-            Collection<INodeEntry> group = toDoNodesByGroup.get(groupName);
-            group.add(node);
+            groupBuilders.get((groupName)).addToDoNode(node);
         }
-
-        // create in progress nodes stacks
-        for(String groupName : toDoNodesByGroup.keySet()) {
-            groupSize.put(groupName, toDoNodesByGroup.get(groupName).size());
-            System.out.println(String.format("%s group contains %d nodes", groupName, groupSize.get(groupName)));
-            inProgressNodesByGroup.put(groupName, new HashMap<String, INodeEntry>());
+        for(String name : groupBuilders.keySet()) {
+            groups.put(name, groupBuilders.get(name).build());
         }
     }
 
@@ -62,39 +57,24 @@ public class TagOrchestrator implements Orchestrator {
     @Override
     public boolean isComplete() {
         // note: doc says we don't have to wait for all nodes to be returned
-        System.out.print("Asked if job is complete...");
-        for(String groupName : toDoNodesByGroup.keySet()) {
-            Collection<INodeEntry> toDoNodes = toDoNodesByGroup.get(groupName);
-            if (!toDoNodes.isEmpty()) {
-                System.out.println("false");
+        for(String groupName : groups.keySet()) {
+            if (!groups.get(groupName).isComplete()) {
+                System.out.println(String.format("asked if job is complete: false because %s is not empty", groupName));
                 return false;
             }
         }
-        System.out.println("true");
+        System.out.println("asked if job is complete: true");
         return true;
-    }
-
-    private boolean canProcessANodeForGroup(String groupName, Map<String, INodeEntry> inProgressNodes) {
-        if (maxPerGroup < 1) { // it is a percentage of nodes
-            return inProgressNodes.size() * 100 / groupSize.get(groupName) < maxPerGroup * 100;
-        } else { // it is a hard number of nodes
-            return inProgressNodes.size() < maxPerGroup;
-        }
     }
 
     @Override
     public INodeEntry nextNode() {
-        for(String groupName : toDoNodesByGroup.keySet()) {
-            Stack<INodeEntry> toDoNodes = (Stack<INodeEntry>)toDoNodesByGroup.get(groupName);
-            Map<String, INodeEntry> inProgressNodes = inProgressNodesByGroup.get(groupName);
+        for(String groupName : groups.keySet()) {
+            Group group = groups.get(groupName);
 
-            boolean canStartANode = toDoNodes.size() > 0 && canProcessANodeForGroup(groupName, inProgressNodes);
-            System.out.println("canProcessANode for group " + groupName + "..." + canStartANode);
-
-            if (canStartANode) {
-                INodeEntry toDoNode = toDoNodes.pop();
-                inProgressNodes.put(toDoNode.extractHostname(), toDoNode);
-                return toDoNode;
+            INodeEntry next = group.nextNode();
+            if (next != null) {
+               return next;
             }
         }
         System.out.println("No node is available or all groups are already at full capacity");
@@ -104,11 +84,7 @@ public class TagOrchestrator implements Orchestrator {
     @Override
     public void returnNode(INodeEntry node, boolean b, NodeStepResult nodeStepResult) {
         String groupName = getNodeGroupName(node, tagNames);
-        System.out.println("Returning " + node.extractHostname() + " in "+ groupName);
-        INodeEntry removedNode = inProgressNodesByGroup.get(groupName).remove(node.extractHostname());
-        if (removedNode == null) {
-            System.err.println(String.format("%s was not in progress but has just been returned. It should be impossible", node.extractHostname()));
-        }
+        groups.get(groupName).returnNode(node);
     }
 }
 

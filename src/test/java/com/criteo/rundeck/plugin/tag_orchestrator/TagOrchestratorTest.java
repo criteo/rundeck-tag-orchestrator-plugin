@@ -16,15 +16,6 @@ public class TagOrchestratorTest {
 
     public String ATTRIBUTE = "datacenter, somethingThatDoesntExist";
 
-    public  TagOrchestratorTest() {
-        ConsoleAppender console = new ConsoleAppender();
-        console.setName("console");
-        console.setLayout(new PatternLayout("%d [%p|%c|%C{1}] %m%n"));
-        console.setThreshold(Level.ALL);
-        console.activateOptions();
-        Logger.getRootLogger().addAppender(console);
-    }
-
     @Test
     public  void TestRespectMaximumPercentagePerGroup() {
         List<INodeEntry> nodes = new ArrayList<INodeEntry>();
