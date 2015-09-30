@@ -30,6 +30,7 @@ public class TagOrchestratorPlugin implements OrchestratorPlugin {
     @Override
     public Orchestrator createOrchestrator(StepExecutionContext context, Collection<INodeEntry> nodes) {
         String[] tags = tagsName.split("( |,)+");
-        return new TagOrchestrator(context, nodes, tags, Double.valueOf(maxPerGroup));
+        OptionsBuilder options = (new OptionsBuilder()).maxPerGroup(Double.valueOf(maxPerGroup)).tagNames(tags);
+        return new TagOrchestrator(context, nodes, options.build());
     }
 }

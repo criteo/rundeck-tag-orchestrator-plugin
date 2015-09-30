@@ -6,7 +6,6 @@ import com.dtolabs.rundeck.core.execution.workflow.steps.node.NodeStepResult;
 import com.dtolabs.rundeck.plugins.orchestrator.Orchestrator;
 
 import java.util.*;
-import org.apache.log4j.Logger;
 
 /**
  * Orchestrate jobs across node groups. Group for a given node is defined using a configured tag.
@@ -14,23 +13,21 @@ import org.apache.log4j.Logger;
 public class TagOrchestrator implements Orchestrator {
 
     public static final String SERVICE_PROVIDER_TYPE = "tag-orchestrator";
-    private final String[] tagNames;
-    private final double maxPerGroup;
 
     private final Map<String, Group> groups = new HashMap<String, Group>();
+    private final Options options;
 
-    public TagOrchestrator(StepExecutionContext context, Collection<INodeEntry> nodes, String[] tagNames, double maxPerGroup) {
+    public TagOrchestrator(StepExecutionContext context, Collection<INodeEntry> nodes, Options options) {
 
-        this.tagNames = tagNames;
-        this.maxPerGroup = maxPerGroup;
+        this.options = options;
 
         Map<String, GroupBuilder> groupBuilders = new HashMap<String, GroupBuilder>();
 
         // create node groups
         for(INodeEntry node : nodes) {
-            String groupName = getNodeGroupName(node, tagNames);
+            String groupName = getNodeGroupName(node, options.tagNames);
             if (!groupBuilders.containsKey(groupName)) {
-                groupBuilders.put(groupName, new GroupBuilder(groupName).setMaxPerGroup(maxPerGroup));
+                groupBuilders.put(groupName, new GroupBuilder(groupName).setMaxPerGroup(options.maxPerGroup));
             }
             groupBuilders.get((groupName)).addToDoNode(node);
         }
@@ -83,7 +80,7 @@ public class TagOrchestrator implements Orchestrator {
 
     @Override
     public void returnNode(INodeEntry node, boolean b, NodeStepResult nodeStepResult) {
-        String groupName = getNodeGroupName(node, tagNames);
+        String groupName = getNodeGroupName(node, options.tagNames);
         groups.get(groupName).returnNode(node, b, nodeStepResult);
     }
 }
