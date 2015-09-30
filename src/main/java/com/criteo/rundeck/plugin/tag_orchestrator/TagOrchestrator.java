@@ -84,7 +84,7 @@ public class TagOrchestrator implements Orchestrator {
     @Override
     public void returnNode(INodeEntry node, boolean b, NodeStepResult nodeStepResult) {
         String groupName = getNodeGroupName(node, tagNames);
-        groups.get(groupName).returnNode(node);
+        groups.get(groupName).returnNode(node, b, nodeStepResult);
     }
 }
 

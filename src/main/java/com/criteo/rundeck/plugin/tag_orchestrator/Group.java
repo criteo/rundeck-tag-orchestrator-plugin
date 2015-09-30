@@ -1,6 +1,7 @@
 package com.criteo.rundeck.plugin.tag_orchestrator;
 
 import com.dtolabs.rundeck.core.common.INodeEntry;
+import com.dtolabs.rundeck.core.execution.workflow.steps.node.NodeStepResult;
 
 import java.util.*;
 
@@ -43,8 +44,8 @@ public class Group {
         }
     }
 
-    public void returnNode(INodeEntry node) {
-        System.out.println("Returning " + node.extractHostname() + " in " + name);
+    public void returnNode(INodeEntry node, boolean success, NodeStepResult nodeStepResult) {
+        System.out.println(String.format("Returning %s in %s (success: %b)", node.extractHostname(), name, success));
         INodeEntry e = inProgressNodes.remove(node.extractHostname());
         if (e == null) {
             System.err.println(String.format("%s was not in progress but has just been returned. It should be impossible", node.extractHostname()));

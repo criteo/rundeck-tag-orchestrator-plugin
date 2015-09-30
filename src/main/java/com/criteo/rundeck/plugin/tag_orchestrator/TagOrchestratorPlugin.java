@@ -16,7 +16,8 @@ public class TagOrchestratorPlugin implements OrchestratorPlugin {
     String tagsName;
 
     // FIXME: properties annotation supports only integer/string/boolean
-    @PluginProperty(title="MaxPerGroup", description = "If value is integer >=1, this is the maximum number of simultaneous updated node per group. If value is a float between 0 and 1, this is a ratio of the number of host per group.")
+    @PluginProperty(title="MaxPerGroup", description = "If value is integer >=1, this is the maximum number of simultaneous updated node per group." +
+            "If value is a float between 0 and 1, this is a ratio of the number of host per group.")
     String maxPerGroup;
 
     public  TagOrchestratorPlugin() {}

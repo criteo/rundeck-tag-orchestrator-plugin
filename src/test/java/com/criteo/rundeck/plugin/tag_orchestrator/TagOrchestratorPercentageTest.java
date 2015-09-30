@@ -23,6 +23,7 @@ public class TagOrchestratorPercentageTest extends TagOrchestratorTest{
     public  static Iterable<Object[]> data() {
         return Arrays.asList(new Object[][] {
                 {0.10, 30},
+                {0.005, 3},
         });
     }
 
