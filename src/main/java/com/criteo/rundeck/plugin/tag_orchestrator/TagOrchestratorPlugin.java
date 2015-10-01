@@ -21,7 +21,7 @@ public class TagOrchestratorPlugin implements OrchestratorPlugin {
     String maxPerGroup;
 
     @PluginProperty(title="StopProcessingGroupAfterTooManyFailure", description = "If set to true, nodes won't be processed in a group where too many nodes have already failed." +
-            "The maximum number of nodes allowed to fail is MaxPerGroup")
+            "The maximum number of nodes allowed to fail is MaxPerGroup", defaultValue=true)
     boolean stopProcessingGroupAfterTooManyFailure;
 
     public  TagOrchestratorPlugin() {}
