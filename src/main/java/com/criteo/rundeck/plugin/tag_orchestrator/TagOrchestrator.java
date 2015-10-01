@@ -6,11 +6,17 @@ import com.dtolabs.rundeck.core.execution.workflow.steps.node.NodeStepResult;
 import com.dtolabs.rundeck.plugins.orchestrator.Orchestrator;
 
 import java.util.*;
+import org.apache.log4j.Logger;
+import org.apache.log4j.ConsoleAppender;
+import org.apache.log4j.PatternLayout;
+import org.apache.log4j.Level;
 
 /**
  * Orchestrate jobs across node groups. Group for a given node is defined using a configured tag.
  */
 public class TagOrchestrator implements Orchestrator {
+
+    private static final Logger logger = Logger.getLogger(TagOrchestrator.class);
 
     public static final String SERVICE_PROVIDER_TYPE = "tag-orchestrator";
 
@@ -18,6 +24,15 @@ public class TagOrchestrator implements Orchestrator {
     private final Options options;
 
     public TagOrchestrator(StepExecutionContext context, Collection<INodeEntry> nodes, Options options) {
+
+        if (logger.getAppender("console") == null) {
+            ConsoleAppender console = new ConsoleAppender();
+            console.setName("console");
+            console.setLayout(new PatternLayout("%d [%p|%C{1}] %m%n"));
+            console.setThreshold(Level.ALL);
+            console.activateOptions();
+            logger.addAppender(console);
+        }
 
         this.options = options;
 
@@ -53,8 +68,9 @@ public class TagOrchestrator implements Orchestrator {
 
     public void printStatus() {
         for(String groupName: groups.keySet()) {
+            logger.debug("Status for " + groupName);
             Group g = groups.get(groupName);
-            System.out.println(String.format("%s: %s processing, %s failed, %s to do", groupName, g.processing_count(), g.failed_count(), g.todo_count()));
+            logger.debug(String.format("%s processing, %s failed, %s to do", g.processing_count(), g.failed_count(), g.todo_count()));
         }
     }
 
@@ -63,11 +79,11 @@ public class TagOrchestrator implements Orchestrator {
         // note: doc says we don't have to wait for all nodes to be returned
         for(String groupName : groups.keySet()) {
             if (!groups.get(groupName).isComplete()) {
-                System.out.println(String.format("asked if job is complete: false because %s is not empty", groupName));
+                logger.info(String.format("asked if job is complete: false because %s is not empty", groupName));
                 return false;
             }
         }
-        System.out.println("asked if job is complete: true");
+        logger.info("asked if job is complete: true");
         return true;
     }
 
@@ -81,7 +97,7 @@ public class TagOrchestrator implements Orchestrator {
                return next;
             }
         }
-        System.out.println("No node is available or all groups are already at full capacity");
+        logger.info("No node is available or all groups are already at full capacity");
         return null;
     }
 
