@@ -51,6 +51,13 @@ public class TagOrchestrator implements Orchestrator {
         return groupName;
     }
 
+    public void printStatus() {
+        for(String groupName: groups.keySet()) {
+            Group g = groups.get(groupName);
+            System.out.println(String.format("%s: %s processing, %s failed, %s to do", groupName, g.processing_count(), g.failed_count(), g.todo_count()));
+        }
+    }
+
     @Override
     public boolean isComplete() {
         // note: doc says we don't have to wait for all nodes to be returned
@@ -79,9 +86,9 @@ public class TagOrchestrator implements Orchestrator {
     }
 
     @Override
-    public void returnNode(INodeEntry node, boolean b, NodeStepResult nodeStepResult) {
+    public void returnNode(INodeEntry node, boolean success, NodeStepResult nodeStepResult) {
         String groupName = getNodeGroupName(node, options.tagNames);
-        groups.get(groupName).returnNode(node, b, nodeStepResult);
+        groups.get(groupName).returnNode(node, success, nodeStepResult);
     }
 }
 

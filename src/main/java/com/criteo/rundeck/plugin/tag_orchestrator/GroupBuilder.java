@@ -8,6 +8,7 @@ import java.util.Collection;
 public  class GroupBuilder {
     private final String name;
     private double maxPerGroup = 1;
+    private boolean stopProcessingGroupAfterTooManyFailure = true;
     private Collection<INodeEntry> nodes = new ArrayList<INodeEntry>();
 
     public  GroupBuilder(String name) {
@@ -19,12 +20,17 @@ public  class GroupBuilder {
         return this;
     }
 
-    public  GroupBuilder addToDoNode(INodeEntry node) {
+    public GroupBuilder addToDoNode(INodeEntry node) {
         this.nodes.add(node);
         return this;
     }
 
+    public GroupBuilder stopProcessingGroupAfterTooManyFailure(boolean value) {
+        this.stopProcessingGroupAfterTooManyFailure = value;
+        return this;
+    }
+
     public Group build() {
-        return  new Group(name, maxPerGroup, nodes);
+        return  new Group(name, maxPerGroup, stopProcessingGroupAfterTooManyFailure, nodes);
     }
 }

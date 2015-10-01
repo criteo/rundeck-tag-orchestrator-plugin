@@ -20,6 +20,10 @@ public class TagOrchestratorPlugin implements OrchestratorPlugin {
             "If value is a float between 0 and 1, this is a ratio of the number of host per group.")
     String maxPerGroup;
 
+    @PluginProperty(title="StopProcessingGroupAfterTooManyFailure", description = "If set to true, nodes won't be processed in a group where too many nodes have already failed." +
+            "The maximum number of nodes allowed to fail is MaxPerGroup")
+    boolean stopProcessingGroupAfterTooManyFailure;
+
     public  TagOrchestratorPlugin() {}
 
     public  TagOrchestratorPlugin(String tagNames, double maxPerGroup) {
@@ -30,7 +34,10 @@ public class TagOrchestratorPlugin implements OrchestratorPlugin {
     @Override
     public Orchestrator createOrchestrator(StepExecutionContext context, Collection<INodeEntry> nodes) {
         String[] tags = tagsName.split("( |,)+");
-        OptionsBuilder options = (new OptionsBuilder()).maxPerGroup(Double.valueOf(maxPerGroup)).tagNames(tags);
+        OptionsBuilder options = (new OptionsBuilder()).
+                maxPerGroup(Double.valueOf(maxPerGroup)).
+                tagNames(tags).
+                stopProcessingGroupAfterTooManyFailure(stopProcessingGroupAfterTooManyFailure);
         return new TagOrchestrator(context, nodes, options.build());
     }
 }

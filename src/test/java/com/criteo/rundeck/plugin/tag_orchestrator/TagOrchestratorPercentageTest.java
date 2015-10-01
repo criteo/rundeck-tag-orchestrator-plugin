@@ -9,9 +9,9 @@ import org.junit.runners.Parameterized;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Stack;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 @RunWith(Parameterized.class)
 public class TagOrchestratorPercentageTest extends TagOrchestratorTest{
@@ -32,7 +32,7 @@ public class TagOrchestratorPercentageTest extends TagOrchestratorTest{
         this.concurrentProcessedNodes = concurrentProcessedNodes;
     }
 
-    @Test
+    //@Test
     public void TestRespectMaximumPercentagePerGroup() {
         List<INodeEntry> nodes = new ArrayList<INodeEntry>();
 
@@ -48,5 +48,62 @@ public class TagOrchestratorPercentageTest extends TagOrchestratorTest{
             assertNotNull(plugin.nextNode());
         }
         assertNull(plugin.nextNode());
+    }
+
+    @Test
+    public  void TestStopProcessingGroupAfterTooManyNodesFailed() {
+        List<INodeEntry> nodes = new ArrayList<INodeEntry>();
+        for (String dc : new String[]{"par", "ny8", "sv6"}) {
+            for (int i = 0; i < 100; ++i) {
+                nodes.add(createNode(dc + String.valueOf(i), dc));
+            }
+        }
+        TagOrchestratorPlugin factory = new TagOrchestratorPlugin(ATTRIBUTE, maxPercentage);
+        factory.stopProcessingGroupAfterTooManyFailure = true; //default but we never know
+        Orchestrator plugin = factory.createOrchestrator(null, nodes);
+
+
+        Stack<INodeEntry> runningNodes = new Stack<INodeEntry>();
+        //Asking for a few nodes
+        for (int i = 0; i < concurrentProcessedNodes; ++i) {
+            runningNodes.add(plugin.nextNode());
+        }
+
+        //Currently processing:
+        ((TagOrchestrator)plugin).printStatus();
+
+        assertNull(plugin.nextNode());
+        //no new node can be processed
+
+        INodeEntry n = runningNodes.pop();
+        plugin.returnNode(n, false, null); // a node has failed
+        //node returned
+        assertNull(plugin.nextNode());
+        //cannot get more node
+
+        assertFalse(plugin.isComplete());
+        //but job is not complete yet
+        for(INodeEntry node : runningNodes) {
+            plugin.returnNode(node, true, null);
+        }
+        //all nodes returned
+        for(int i=0; i<100; ++i) {
+            n = plugin.nextNode();
+            plugin.returnNode(n, true, null);
+        }
+
+        ((TagOrchestrator)plugin).printStatus();
+        n = plugin.nextNode();
+        while(n != null) {
+          plugin.returnNode(n, false, null);
+          n = plugin.nextNode();
+        }
+        //many failed nodes returned
+        ((TagOrchestrator)plugin).printStatus();
+        // there are still nodes to treat but all groups have too many failed nodes
+        assertNull(plugin.nextNode());
+        assertTrue(plugin.isComplete());
+
+
     }
 }
