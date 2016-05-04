@@ -8,3 +8,4 @@ target
 *.sublime*
 /bin/
 .idea
+*.gpg
