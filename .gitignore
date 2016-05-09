@@ -9,3 +9,4 @@ target
 /bin/
 .idea
 *.gpg
+keys.tar
