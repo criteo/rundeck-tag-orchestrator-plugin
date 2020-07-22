@@ -4,13 +4,11 @@ import com.dtolabs.rundeck.core.common.INodeEntry;
 import com.dtolabs.rundeck.core.execution.workflow.steps.node.NodeStepResult;
 
 import java.util.*;
-import org.apache.log4j.Logger;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.PatternLayout;
-import org.apache.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class Group {
-    private static final Logger logger = Logger.getLogger(Group.class);
+    private static final Logger logger = LogManager.getLogger(Group.class);
     public final String name;
     final Stack<INodeEntry> todoNodes = new Stack<INodeEntry>();
     final Map<String, INodeEntry> inProgressNodes = new HashMap<String, INodeEntry>();
@@ -34,14 +32,6 @@ public class Group {
 
 
     public Group(String name, double maxPerGroup, boolean stopProcessingGroupAfterTooManyFailure, Collection<INodeEntry> todoNodes) {
-        if (logger.getAppender("console") == null) {
-            ConsoleAppender console = new ConsoleAppender();
-            console.setName("console");
-            console.setLayout(new PatternLayout("%d [%p|%C{1}] %m%n"));
-            console.setThreshold(Level.ALL);
-            console.activateOptions();
-            logger.addAppender(console);
-        }
         this.name = name;
         this.todoNodes.addAll(todoNodes);
         this.stopProcessingGroupAfterTooManyFailure = stopProcessingGroupAfterTooManyFailure;

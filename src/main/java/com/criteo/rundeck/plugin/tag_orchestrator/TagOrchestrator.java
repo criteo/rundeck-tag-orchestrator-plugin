@@ -6,17 +6,15 @@ import com.dtolabs.rundeck.core.execution.workflow.steps.node.NodeStepResult;
 import com.dtolabs.rundeck.plugins.orchestrator.Orchestrator;
 
 import java.util.*;
-import org.apache.log4j.Logger;
-import org.apache.log4j.ConsoleAppender;
-import org.apache.log4j.PatternLayout;
-import org.apache.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Orchestrate jobs across node groups. Group for a given node is defined using a configured tag.
  */
 public class TagOrchestrator implements Orchestrator {
 
-    private static final Logger logger = Logger.getLogger(TagOrchestrator.class);
+    private static final Logger logger = LogManager.getLogger(TagOrchestrator.class);
 
     public static final String SERVICE_PROVIDER_TYPE = "tag-orchestrator";
 
@@ -24,15 +22,6 @@ public class TagOrchestrator implements Orchestrator {
     private final Options options;
 
     public TagOrchestrator(StepExecutionContext context, Collection<INodeEntry> nodes, Options options) {
-
-        if (logger.getAppender("console") == null) {
-            ConsoleAppender console = new ConsoleAppender();
-            console.setName("console");
-            console.setLayout(new PatternLayout("%d [%p|%C{1}] %m%n"));
-            console.setThreshold(Level.ALL);
-            console.activateOptions();
-            logger.addAppender(console);
-        }
 
         this.options = options;
 
